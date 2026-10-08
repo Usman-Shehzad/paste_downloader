@@ -40,7 +40,9 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="animate-fade-up mt-10 [animation-delay:120ms]">
+          {/* z-20: the fade-in animation makes this its own stacking context, so
+              the "More" menu inside must sit above the content that follows. */}
+          <div className="animate-fade-up relative z-20 mt-10 [animation-delay:120ms]">
             <Downloader />
           </div>
 
