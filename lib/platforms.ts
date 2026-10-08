@@ -21,7 +21,7 @@ export const PLATFORMS: Platform[] = [
     icon: FaYoutube,
     color: "#FF0033",
     domains: ["youtube.com", "youtu.be"],
-    example: "https://www.youtube.com/watch?v=...",
+    example: "https://www.youtube.com/watch?v=... or https://youtube.com/shorts/...",
     content: ["Videos", "Shorts", "Music audio"],
   },
   {

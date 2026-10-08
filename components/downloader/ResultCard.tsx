@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiCheckCircle, FiClock, FiDownload, FiFilm, FiMusic, FiPlay, FiRefreshCw, FiUser } from "react-icons/fi";
+import { FiAlertTriangle, FiCheckCircle, FiClock, FiDownload, FiFilm, FiMusic, FiPlay, FiRefreshCw, FiUser } from "react-icons/fi";
 import { downloadUrl, formatBytes, formatDuration, type VideoFormat, type VideoInfo } from "@/lib/api";
 import { getPlatform } from "@/lib/platforms";
 import PreviewModal from "./PreviewModal";
@@ -60,7 +60,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
             </button>
           )}
           <span className="pointer-events-none absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
-            <Icon style={{ color }} /> {name}
+            <Icon style={{ color }} /> {info.is_short ? "YouTube Shorts" : name}
           </span>
           {info.duration ? (
             <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-0.5 text-xs font-medium text-white">
@@ -84,12 +84,21 @@ export default function ResultCard({ info, url, onReset }: Props) {
                 <FiClock /> {formatDuration(info.duration)}
               </span>
             ) : null}
-            <span className="flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1">
-              <FiFilm /> {info.formats.length} formats
-            </span>
+            {info.formats.length > 0 && (
+              <span className="flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1">
+                <FiFilm /> {info.formats.length} formats
+              </span>
+            )}
           </div>
         </div>
 
+        {info.notice ? (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
+            <FiAlertTriangle className="mt-0.5 shrink-0" />
+            <p>{info.notice}</p>
+          </div>
+        ) : (
+          <>
         <div role="tablist" className="flex gap-1 self-start rounded-xl bg-surface-2 p-1 text-sm">
           {(
             [
@@ -157,6 +166,8 @@ export default function ResultCard({ info, url, onReset }: Props) {
         ) : (
           <p className="rounded-xl bg-surface-2 p-4 text-sm text-muted">No {tab} formats available.</p>
         )}
+          </>
+        )}
 
         <div className="mt-auto flex flex-col gap-2">
           {selected ? (
@@ -173,7 +184,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
             </a>
           ) : (
             <button disabled className="h-12 w-full rounded-xl bg-surface-2 font-semibold text-muted">
-              Choose a quality
+              {info.notice ? "Download unavailable" : "Choose a quality"}
             </button>
           )}
           <div className={`grid gap-2 ${info.embed_url ? "grid-cols-2" : "grid-cols-1"}`}>

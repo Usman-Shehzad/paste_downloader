@@ -7,7 +7,9 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import json
 import time
+import urllib.request
 from collections import defaultdict, deque
 from urllib.parse import quote, urlparse
 
@@ -332,6 +334,51 @@ def _audio_rank(f: dict) -> tuple:
     # dynamic-range-compressed copy, then bitrate.
     drc = "drc" in str(f.get("format_id"))
     return (f.get("ext") == "m4a", not drc, f.get("abr") or f.get("tbr") or 0)
+
+
+YOUTUBE_ID_RE = re.compile(r"(?:youtu\.be/|/shorts/|/live/|/embed/|[?&]v=)([\w-]{11})")
+
+
+def youtube_id(url: str) -> str | None:
+    m = YOUTUBE_ID_RE.search(url)
+    return m.group(1) if m else None
+
+
+def is_youtube_short(url: str, info: dict) -> bool:
+    if "/shorts/" in url or "/shorts/" in (info.get("webpage_url") or ""):
+        return True
+    w, h = info.get("width"), info.get("height")
+    return bool(w and h and h > w and (info.get("duration") or 0) <= 180)
+
+
+def youtube_preview(url: str) -> dict | None:
+    """Title, channel and thumbnail from YouTube's official oEmbed endpoint.
+
+    oEmbed isn't behind YouTube's bot check, so this still works when yt-dlp is
+    blocked on a data-center IP (e.g. Vercel). It has no media files, so the
+    result can be previewed and watched but not downloaded.
+    """
+    vid = youtube_id(url)
+    if not vid:
+        return None
+    # Asking with the /shorts/ form makes oEmbed report the vertical player size.
+    canonical = f"https://www.youtube.com/{'shorts/' if '/shorts/' in url else 'watch?v='}{vid}"
+    endpoint = "https://www.youtube.com/oembed?format=json&url=" + quote(canonical, safe="")
+    try:
+        req = urllib.request.Request(endpoint, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.load(resp)
+    except Exception as e:  # private/removed videos return 401/404
+        log.warning("oEmbed fallback failed: %s", e)
+        return None
+    return {
+        "id": vid,
+        "title": data.get("title"),
+        "uploader": data.get("author_name"),
+        "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
+        "width": data.get("width"),
+        "height": data.get("height"),
+    }
 
 
 def embed_url(platform: str, info: dict) -> str | None:

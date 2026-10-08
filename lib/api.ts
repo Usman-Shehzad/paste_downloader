@@ -21,6 +21,9 @@ export interface VideoInfo {
   width: number | null;
   height: number | null;
   embed_url: string | null;
+  is_short: boolean;
+  // Set when the video can be previewed but not downloaded (e.g. YouTube blocking the server).
+  notice: string | null;
   formats: VideoFormat[];
 }
 

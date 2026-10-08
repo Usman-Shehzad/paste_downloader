@@ -14,6 +14,7 @@ interface Props {
 
 // TikTok and Instagram embeds are always portrait; others follow the video's shape.
 function isPortrait(info: VideoInfo): boolean {
+  if (info.is_short) return true;
   if (info.width && info.height) return info.height > info.width;
   return info.platform === "tiktok" || info.platform === "instagram";
 }

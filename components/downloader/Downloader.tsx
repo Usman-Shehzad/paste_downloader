@@ -82,7 +82,9 @@ export default function Downloader() {
           onSubmit={submit}
           loading={loading}
           invalid={invalid || wrongTab}
-          placeholder={`Paste ${current.name} link here…`}
+          placeholder={
+            platform === "youtube" ? "Paste YouTube video or Shorts link here…" : `Paste ${current.name} link here…`
+          }
         />
 
         <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-muted">

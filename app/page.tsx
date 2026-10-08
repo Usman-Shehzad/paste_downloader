@@ -35,8 +35,8 @@ export default function Home() {
               <span className="text-gradient">Capture the video.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">
-              Download videos and audio from YouTube, TikTok, Instagram and Facebook in the quality you want, in
-              seconds.
+              Download videos, Shorts, Reels and audio from YouTube, TikTok, Instagram and Facebook in the
+              quality you want, in seconds.
             </p>
           </div>
 

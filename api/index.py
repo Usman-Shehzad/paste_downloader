@@ -19,6 +19,7 @@ from _common import (  # noqa: E402
     extract,
     find_format,
     friendly_error,
+    is_youtube_short,
     MergeStream,
     normalize_formats,
     rate_limited,
@@ -26,6 +27,7 @@ from _common import (  # noqa: E402
     stream_format,
     validate_url,
     ydl_opts,
+    youtube_preview,
 )
 
 app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
@@ -64,12 +66,38 @@ def info(body: InfoRequest, request: Request):
             f"This is a {PLATFORM_NAMES[platform]} link. Switch to the {PLATFORM_NAMES[platform]} tab "
             f"or paste a {PLATFORM_NAMES.get(body.platform, body.platform)} link."
         )
-    data = extract(body.url)
+    try:
+        data = extract(body.url)
+    except UserError as e:
+        # YouTube often bot-blocks data-center IPs. Fall back to the official
+        # oEmbed preview so the video can still be seen and watched.
+        if platform == "youtube" and e.status == 422 and (preview := youtube_preview(body.url)):
+            short = is_youtube_short(body.url, preview)
+            return {
+                "platform": platform,
+                "is_short": short,
+                "title": preview["title"] or "Video",
+                "thumbnail": preview["thumbnail"],
+                "duration": None,
+                "uploader": preview["uploader"],
+                "width": preview["width"],
+                "height": preview["height"],
+                "embed_url": embed_url(platform, preview),
+                "formats": [],
+                "notice": (
+                    f"YouTube {'Shorts' if short else 'video'} downloads are temporarily unavailable "
+                    "because YouTube is limiting our server. You can still watch it here, "
+                    "or try again later."
+                ),
+            }
+        raise
     formats = normalize_formats(data)
     if not formats:
         raise UserError("No downloadable formats found for this video.", 404)
     return {
         "platform": platform,
+        "is_short": platform == "youtube" and is_youtube_short(body.url, data),
+        "notice": None,
         "title": data.get("title") or "Video",
         "thumbnail": data.get("thumbnail"),
         "duration": data.get("duration"),

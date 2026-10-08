@@ -7,6 +7,10 @@ const FAQS = [
     a: "Yes. There's no sign-up, no payment and no limit on how many videos you can download.",
   },
   {
+    q: "Can I download YouTube Shorts?",
+    a: "Yes. Paste a Shorts link (youtube.com/shorts/...) into the YouTube tab. You can watch it in the vertical player and download it as a video or audio only.",
+  },
+  {
     q: "Where do I find the video link?",
     a: "In the app, tap Share on the video and choose Copy link. In a browser, copy the address from the address bar.",
   },
