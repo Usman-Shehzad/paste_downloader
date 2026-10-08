@@ -42,7 +42,8 @@ export default function PlatformTabs({ selected, onSelect }: Props) {
     <div ref={rootRef} className="relative flex gap-1 rounded-2xl border border-border bg-surface-2 p-1">
       <div role="tablist" aria-label="Platform" className="flex min-w-0 flex-1 gap-1">
         {tabs.map((p) => (
-          <Tab key={p.id} platform={p} active={p.id === selected} onClick={() => pick(p.id)} />
+          // Names fit beside the icons for the 5 main tabs, not with a 6th.
+          <Tab key={p.id} platform={p} active={p.id === selected} showName={!extra} onClick={() => pick(p.id)} />
         ))}
       </div>
 
@@ -90,7 +91,17 @@ export default function PlatformTabs({ selected, onSelect }: Props) {
   );
 }
 
-function Tab({ platform, active, onClick }: { platform: Platform; active: boolean; onClick: () => void }) {
+function Tab({
+  platform,
+  active,
+  showName,
+  onClick,
+}: {
+  platform: Platform;
+  active: boolean;
+  showName: boolean;
+  onClick: () => void;
+}) {
   const { name, icon: Icon, color } = platform;
   return (
     <button
@@ -109,7 +120,7 @@ function Tab({ platform, active, onClick }: { platform: Platform; active: boolea
         className="shrink-0 transition-transform group-hover:scale-110"
         style={{ color: active ? color : undefined }}
       />
-      <span className="hidden truncate lg:inline">{name}</span>
+      {showName && <span className="hidden truncate lg:inline">{name}</span>}
       {active && <span className="absolute inset-x-4 -bottom-px h-0.5 rounded-full" style={{ background: color }} />}
     </button>
   );

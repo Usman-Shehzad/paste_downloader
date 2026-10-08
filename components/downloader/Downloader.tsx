@@ -9,9 +9,9 @@ import PlatformTabs from "./PlatformTabs";
 import ResultCard, { ResultSkeleton } from "./ResultCard";
 import UrlInput from "./UrlInput";
 
-export default function Downloader() {
+export default function Downloader({ initialPlatform = "tiktok" }: { initialPlatform?: PlatformId }) {
   const [url, setUrl] = useState("");
-  const [platform, setPlatform] = useState<PlatformId>("tiktok");
+  const [platform, setPlatform] = useState<PlatformId>(initialPlatform);
   const [info, setInfo] = useState<VideoInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +39,20 @@ export default function Downloader() {
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
+  }, []);
+
+  // Links shared into the installed app (Android share sheet → manifest
+  // share_target) or opened as /?url=… arrive in the query string. Apps often
+  // share text like "Watch this! https://vt.tiktok.com/…", so pull out the URL.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shared = ["url", "text", "title"].map((k) => params.get(k) ?? "").join(" ");
+    const link = shared.match(/https?:\/\/[^\s"'<>]+/)?.[0];
+    if (!link) return;
+    const id = detectPlatform(link);
+    if (id) setPlatform(id);
+    setUrl(link);
+    window.history.replaceState(null, "", window.location.pathname);
   }, []);
 
   // Fetch details once a link matching the selected tab is pasted.

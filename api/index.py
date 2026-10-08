@@ -16,13 +16,16 @@ from _common import (  # noqa: E402
     FfmpegStream,
     UserError,
     best_audio,
+    check_not_blocked,
     embed_url,
     extract,
     find_format,
-    first_entry,
+    MP3_ID,
     friendly_error,
     is_youtube_short,
+    media_entries,
     media_type,
+    mp3_source,
     normalize_formats,
     platform_name,
     rate_limited,
@@ -69,8 +72,9 @@ def info(body: InfoRequest, request: Request):
             f"or paste a {platform_name(body.platform)} link."
         )
     url = resolve_short_link(body.url.strip(), platform)
+    check_not_blocked(body.url, url)
     try:
-        data = extract(url, platform)
+        post, entries = extract(url, platform)
     except UserError as e:
         # YouTube often bot-blocks data-center IPs. Fall back to the official
         # oEmbed preview so the video can still be seen and watched.
@@ -94,21 +98,34 @@ def info(body: InfoRequest, request: Request):
                 ),
             }
         raise
-    formats = normalize_formats(data)
-    if not formats:
+    items = []
+    for source_index, entry in enumerate(entries):
+        formats = normalize_formats(entry)
+        if formats:
+            items.append({
+                "title": entry.get("title") or entry.get("description") or post.get("title") or "Video",
+                "thumbnail": entry.get("thumbnail") or post.get("thumbnail"),
+                "duration": entry.get("duration"),
+                "width": entry.get("width"),
+                "height": entry.get("height"),
+                "embed_url": embed_url(platform, entry),
+                "formats": formats,
+                "index": len(items),
+                "source_index": source_index,
+            })
+    check_not_blocked(post.get("webpage_url"), *(e.get("webpage_url") for e in entries))
+    if not items:
         raise UserError("No downloadable video found in this post.", 404)
+    first = items[0]
     return {
         "platform": platform,
-        "is_short": platform == "youtube" and is_youtube_short(url, data),
+        "is_short": platform == "youtube" and is_youtube_short(url, entries[0]),
         "notice": None,
-        "title": data.get("title") or data.get("description") or "Video",
-        "thumbnail": data.get("thumbnail"),
-        "duration": data.get("duration"),
-        "uploader": data.get("uploader") or data.get("channel") or data.get("creator"),
-        "width": data.get("width"),
-        "height": data.get("height"),
-        "embed_url": embed_url(platform, data),
-        "formats": formats,
+        "uploader": post.get("uploader") or post.get("channel") or post.get("creator")
+        or entries[0].get("uploader"),
+        # The first video's details at the top level; every video in `items`.
+        **{k: first[k] for k in ("title", "thumbnail", "duration", "width", "height", "embed_url", "formats")},
+        "items": items,
     }
 
 
@@ -117,19 +134,25 @@ def download(
     request: Request,
     url: str = Query(...),
     format_id: str = Query(...),
+    item: int = Query(0, ge=0),  # which video of a multi-video post (`source_index`)
     inline: bool = Query(False),  # true: play in the page (preview) instead of saving
 ):
     _check_rate(request)
     platform = validate_url(url)
     url = resolve_short_link(url.strip(), platform)
+    check_not_blocked(url)
 
     # Re-extract in this same invocation: media URLs are often bound to the
     # extracting IP and expire, so they can't be reused from /info.
     ydl = yt_dlp.YoutubeDL(ydl_opts(platform))
     try:
-        data = first_entry(ydl.extract_info(url, download=False)) or {}
+        entries = media_entries(ydl.extract_info(url, download=False))
+        if item >= len(entries):
+            raise UserError("That video isn't in this post anymore.", 404)
+        data = entries[item]
+        check_not_blocked(data.get("webpage_url"))
         allowed = {f["format_id"]: f for f in normalize_formats(data) if f["available"]}
-        fmt = find_format(data, format_id)
+        fmt = mp3_source(data) if format_id == MP3_ID else find_format(data, format_id)
         if format_id not in allowed or fmt is None:
             raise UserError("That quality isn't available for download.", 400)
     except yt_dlp.utils.DownloadError as e:
@@ -145,7 +168,9 @@ def download(
         sources = [fmt] + ([best_audio(data)] if choice["needs_merge"] else [])
         # One YoutubeDL per input so feeder threads don't share a session.
         ydls = [ydl] + [yt_dlp.YoutubeDL(ydl_opts(platform)) for _ in sources[1:]]
-        ffmpeg = FfmpegStream(ydls, sources, out="mp3" if choice["ext"] == "mp3" else "mp4")
+        ffmpeg = FfmpegStream(
+            ydls, sources, out="mp3" if choice["ext"] == "mp3" else "mp4", to_mp3=format_id == MP3_ID
+        )
         stream, closers = iter(ffmpeg), ydls
     else:
         stream, closers = stream_format(ydl, fmt), [ydl]

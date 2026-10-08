@@ -28,7 +28,18 @@ pnpm dev              # Next.js on :3000, FastAPI on :8000 (proxied via next.con
 |---|---|
 | `YT_COOKIES` | Netscape-format cookies.txt contents, for login walls and bot checks |
 | `DENO_PATH` | Path to the `deno` binary if it isn't on `PATH` |
+| `NEXT_PUBLIC_SITE_URL` | Your public domain (e.g. `https://pastecap.com`), used for the sitemap, canonical links and Open Graph. Defaults to Vercel's production URL. |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Contact address shown on the Terms, Privacy and DMCA pages. **Set this before launch.** |
+| `BLOCKED_LINKS` | Comma-separated video IDs or URL fragments to refuse (for DMCA takedowns). |
 | `PROXY_URL` | Outbound proxy for yt-dlp (e.g. a residential proxy if a platform blocks Vercel IPs) |
+
+## Pages
+- `/` home, plus one landing page per platform (`/tiktok-downloader`, `/twitter-video-downloader`, … see `lib/seo.ts`)
+- `/terms`, `/privacy`, `/dmca` (templates: have them reviewed before relying on them)
+- `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`
+
+## Install as an app
+The site is a PWA (`app/manifest.ts`, `public/sw.js`). Browsers that support it show an **Install app** button. On Android the installed app appears in other apps' Share menu; shared links open as `/?url=…` / `/?text=…` and are picked up automatically.
 
 ## How downloads work
 - Plain video files are streamed straight through to the browser.

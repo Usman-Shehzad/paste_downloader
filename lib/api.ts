@@ -16,6 +16,19 @@ export interface VideoFormat {
   available: boolean;
 }
 
+/** One video of a post; posts with several videos (carousels, threads) have many. */
+export interface VideoItem {
+  title: string;
+  thumbnail: string | null;
+  duration: number | null;
+  width: number | null;
+  height: number | null;
+  embed_url: string | null;
+  formats: VideoFormat[];
+  /** What to pass as `item` when downloading this video. */
+  source_index: number;
+}
+
 export interface VideoInfo {
   platform: PlatformId;
   title: string;
@@ -29,6 +42,10 @@ export interface VideoInfo {
   // Set when the video can be previewed but not downloaded (e.g. a platform blocking the server).
   notice: string | null;
   formats: VideoFormat[];
+  /** Every video in the post; the top-level fields describe the first one. */
+  items?: VideoItem[];
+  /** Set by the result card to the selected video's `source_index`. */
+  item?: number;
 }
 
 export async function fetchInfo(
@@ -47,9 +64,13 @@ export async function fetchInfo(
   return data as VideoInfo;
 }
 
-/** `inline` streams the file for playing in the page instead of saving it. */
-export function downloadUrl(url: string, formatId: string, inline = false): string {
+/**
+ * `item` picks a video in a multi-video post; `inline` streams the file for
+ * playing in the page instead of saving it.
+ */
+export function downloadUrl(url: string, formatId: string, { item = 0, inline = false } = {}): string {
   const params = new URLSearchParams({ url, format_id: formatId });
+  if (item) params.set("item", String(item));
   if (inline) params.set("inline", "1");
   return `/api/py/download?${params}`;
 }

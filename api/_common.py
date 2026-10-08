@@ -90,6 +90,15 @@ def detect_platform(url: str) -> str | None:
     return None
 
 
+def check_not_blocked(*urls: str | None):
+    """Links removed after a copyright (DMCA) notice. BLOCKED_LINKS is a
+    comma-separated list of video IDs or URL fragments, set in the environment."""
+    blocked = [b.strip().lower() for b in os.environ.get("BLOCKED_LINKS", "").split(",") if b.strip()]
+    for url in filter(None, urls):
+        if any(b in url.lower() for b in blocked):
+            raise UserError("This video has been removed following a copyright request.", 451)
+
+
 def validate_url(url: str) -> str:
     """Return the platform id, or raise UserError. Blocks non-allowlisted hosts (SSRF)."""
     url = (url or "").strip()
@@ -193,14 +202,19 @@ def deno_path() -> str | None:
         return None
 
 
-def first_entry(info: dict) -> dict | None:
-    """Posts with several videos (X, Reddit, Bluesky...) come back as playlists."""
+MAX_ITEMS = 20
+
+
+def media_entries(info: dict) -> list[dict]:
+    """The videos in a post. Posts with several videos (Instagram carousels,
+    X, Reddit galleries...) come back as playlists; images are skipped."""
     if info.get("_type") != "playlist":
-        return info
-    return next((e for e in info.get("entries") or [] if e and e.get("formats")), None)
+        return [info] if info.get("formats") else []
+    return [e for e in info.get("entries") or [] if e and e.get("formats")][:MAX_ITEMS]
 
 
-def extract(url: str, platform: str) -> dict:
+def extract(url: str, platform: str) -> tuple[dict, list[dict]]:
+    """(the post's info, its videos)."""
     import yt_dlp
 
     try:
@@ -208,10 +222,10 @@ def extract(url: str, platform: str) -> dict:
             info = ydl.extract_info(url, download=False)
     except yt_dlp.utils.DownloadError as e:
         raise UserError(friendly_error(str(e)), 422) from e
-    info = first_entry(info)
-    if not info:
+    entries = media_entries(info)
+    if not entries:
         raise UserError("No video found at this link.", 404)
-    return info
+    return info, entries
 
 
 def friendly_error(msg: str) -> str:
@@ -223,6 +237,8 @@ def friendly_error(msg: str) -> str:
         return "The platform requires login or blocked the request. Try again later."
     if "unsupported url" in m or "no suitable extractor" in m:
         return "This link doesn't point to a downloadable video."
+    if "timed out" in m or "timeout" in m:
+        return "The platform took too long to respond. Please try again."
     if "429" in m or "rate" in m:
         return "Too many requests to the platform. Please try again in a minute."
     if "needs to be reloaded" in m or "js runtime" in m or "challenge" in m:
@@ -359,7 +375,14 @@ class FfmpegStream:
     the temp files.
     """
 
-    def __init__(self, ydls: list, sources: list[dict], out: str = "mp4", chunk_size: int = 256 * 1024):
+    def __init__(
+        self,
+        ydls: list,
+        sources: list[dict],
+        out: str = "mp4",
+        to_mp3: bool = False,
+        chunk_size: int = 256 * 1024,
+    ):
         self.chunk_size = chunk_size
         self._lock = threading.Lock()
         self._closed = False
@@ -375,13 +398,16 @@ class FfmpegStream:
             feeds.append((ydl, f, pipe))
             cmd += ["-i", pipe]
 
-        if len(sources) == 2:
-            cmd += ["-map", "0:v:0", "-map", "1:a:0"]
+        if to_mp3:
+            # The only re-encode we do: audio to constant-bitrate MP3 (so the
+            # size estimate is accurate).
+            cmd += ["-map", "0:a:0", "-vn", "-c:a", "libmp3lame", "-b:a", f"{MP3_KBPS}k"]
+        elif len(sources) == 2:
+            cmd += ["-map", "0:v:0", "-map", "1:a:0", "-c", "copy"]
         else:
-            cmd += ["-map", "0:v:0?", "-map", "0:a:0?"]
-        cmd += ["-c", "copy"]
+            cmd += ["-map", "0:v:0?", "-map", "0:a:0?", "-c", "copy"]
         # AAC from MPEG-TS (HLS) segments is ADTS-framed; MP4 needs it converted.
-        if out != "mp3" and any(_is_hls(f) and (f.get("acodec") or "mp4a").startswith("mp4a") for f in sources):
+        if not to_mp3 and out != "mp3" and any(_is_hls(f) and (f.get("acodec") or "mp4a").startswith("mp4a") for f in sources):
             cmd += ["-bsf:a", "aac_adtstoasc"]
         if out == "mp3":
             cmd += ["-f", "mp3"]
@@ -485,6 +511,21 @@ def _audio_ext(f: dict) -> str:
 
 
 VIDEO_EXTS = ("mp4", "webm", "mov", "m4v", "mkv")
+MP3_ID = "mp3"
+MP3_KBPS = 192
+
+
+def mp3_source(info: dict) -> dict | None:
+    """What to convert to MP3: the best audio-only stream, else the smallest
+    video that has sound (posts like Instagram Reels have no separate audio)."""
+    audio = best_audio(info)
+    if audio:
+        return audio
+    muxed = [
+        f for f in info.get("formats") or []
+        if _usable(f) and _classify(f) == (True, True)
+    ]
+    return min(muxed, key=lambda f: (_is_hls(f), f.get("tbr") or f.get("height") or 0), default=None)
 UNSIZED_QUALITIES = ("Best", "High", "Medium", "Low")
 
 
@@ -545,6 +586,21 @@ def normalize_formats(info: dict) -> list[dict]:
             "needs_merge": needs_merge,
             "needs_ffmpeg": needs_ffmpeg,
             "available": has_ffmpeg or not needs_ffmpeg,
+        })
+    # MP3 conversion, unless the platform's own audio already is MP3.
+    if has_ffmpeg and mp3_source(info) and not (audio and _audio_ext(audio) == "mp3"):
+        out.append({
+            "format_id": MP3_ID,
+            "label": "MP3 audio",
+            "quality": "MP3",
+            "kind": "audio",
+            "height": None,
+            "fps": None,
+            "ext": "mp3",
+            "filesize": int(MP3_KBPS * 1000 / 8 * duration) if duration else None,
+            "needs_merge": False,
+            "needs_ffmpeg": True,
+            "available": True,
         })
     if audio:
         ext = _audio_ext(audio)

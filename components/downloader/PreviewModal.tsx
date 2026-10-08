@@ -86,7 +86,7 @@ export default function PreviewModal({ info, url, onClose }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={info.thumbnail} alt="" referrerPolicy="no-referrer" className="aspect-square w-full rounded-xl object-cover" />
             )}
-            <audio src={downloadUrl(url, preview.format_id, true)} controls autoPlay className="w-full" />
+            <audio src={downloadUrl(url, preview.format_id, { item: info.item, inline: true })} controls autoPlay className="w-full" />
           </div>
         ) : (
           <div
@@ -109,7 +109,7 @@ export default function PreviewModal({ info, url, onClose }: Props) {
             ) : (
               preview && (
                 <video
-                  src={downloadUrl(url, preview.format_id, true)}
+                  src={downloadUrl(url, preview.format_id, { item: info.item, inline: true })}
                   poster={info.thumbnail ?? undefined}
                   controls
                   autoPlay

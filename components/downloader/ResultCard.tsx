@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { FiAlertTriangle, FiCheckCircle, FiClock, FiDownload, FiFilm, FiMusic, FiPlay, FiRefreshCw, FiUser } from "react-icons/fi";
-import { downloadUrl, formatBytes, formatDuration, type VideoFormat, type VideoInfo } from "@/lib/api";
+import { FiAlertTriangle, FiCheckCircle, FiLayers, FiClock, FiDownload, FiFilm, FiMusic, FiPlay, FiRefreshCw, FiUser } from "react-icons/fi";
+import {
+  downloadUrl,
+  formatBytes,
+  formatDuration,
+  type VideoFormat,
+  type VideoInfo,
+  type VideoItem,
+} from "@/lib/api";
 import { getPlatform } from "@/lib/platforms";
 import PreviewModal, { canPreview } from "./PreviewModal";
 
@@ -14,7 +21,50 @@ interface Props {
 
 type Tab = "video" | "audio";
 
+/** Picks which video of a multi-video post to show; each gets a fresh card. */
 export default function ResultCard({ info, url, onReset }: Props) {
+  const [index, setIndex] = useState(0);
+  const items = info.items ?? [];
+  const current = items[index];
+  const view: VideoInfo = current ? { ...info, ...current, item: current.source_index } : info;
+  const picker =
+    items.length > 1 ? <ItemPicker items={items} index={index} onSelect={setIndex} /> : null;
+  return <ItemCard key={index} info={view} url={url} onReset={onReset} picker={picker} />;
+}
+
+function ItemPicker({ items, index, onSelect }: { items: VideoItem[]; index: number; onSelect: (i: number) => void }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="flex items-center gap-1.5 text-xs font-medium text-muted">
+        <FiLayers /> This post has {items.length} videos
+      </p>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {items.map((it, i) => (
+          <button
+            key={it.source_index}
+            type="button"
+            onClick={() => onSelect(i)}
+            aria-label={`Video ${i + 1}`}
+            aria-pressed={i === index}
+            className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-2 transition ${
+              i === index ? "ring-2 ring-accent" : "opacity-60 hover:opacity-100"
+            }`}
+          >
+            {it.thumbnail && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={it.thumbnail} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
+            )}
+            <span className="absolute bottom-0.5 right-0.5 rounded bg-black/75 px-1 text-[10px] font-bold text-white">
+              {i + 1}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ItemCard({ info, url, onReset, picker }: Props & { picker: React.ReactNode }) {
   const videos = info.formats.filter((f) => f.kind === "video");
   const audios = info.formats.filter((f) => f.kind === "audio");
   const [tab, setTab] = useState<Tab>(videos.some((f) => f.available) ? "video" : "audio");
@@ -92,6 +142,8 @@ export default function ResultCard({ info, url, onReset }: Props) {
             )}
           </div>
         </div>
+
+        {picker}
 
         {info.notice ? (
           <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
@@ -174,13 +226,13 @@ export default function ResultCard({ info, url, onReset }: Props) {
           {selected ? (
             // A plain link lets the browser handle the streamed file with its native download UI.
             <a
-              href={downloadUrl(url, selected.format_id)}
+              href={downloadUrl(url, selected.format_id, { item: info.item })}
               download
               onClick={() => setStarted(true)}
               className="bg-gradient-accent flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98]"
             >
               <FiDownload className="shrink-0" />
-              Download {selected.kind === "audio" ? "audio" : selected.quality}
+              Download {selected.quality}
               {selected.filesize ? <span className="font-medium opacity-80">· {sizeLabel(selected)}</span> : null}
             </a>
           ) : (

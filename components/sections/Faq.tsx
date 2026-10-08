@@ -1,7 +1,8 @@
 import { FiChevronDown } from "react-icons/fi";
+import type { Faq as FaqItem } from "@/lib/seo";
 import SectionHeading from "./SectionHeading";
 
-const FAQS = [
+export const HOME_FAQS: FaqItem[] = [
   {
     q: "Is Paste Cap free?",
     a: "Yes. There's no sign-up, no payment and no limit on how many videos you can download.",
@@ -32,12 +33,18 @@ const FAQS = [
   },
 ];
 
-export default function Faq() {
+export default function Faq({
+  items = HOME_FAQS,
+  title = "Frequently asked questions",
+}: {
+  items?: FaqItem[];
+  title?: string;
+}) {
   return (
     <section id="faq" className="scroll-mt-20 py-24">
-      <SectionHeading eyebrow="FAQ" title="Frequently asked questions" />
+      <SectionHeading eyebrow="FAQ" title={title} />
       <div className="mx-auto max-w-3xl space-y-3">
-        {FAQS.map(({ q, a }) => (
+        {items.map(({ q, a }) => (
           <details
             key={q}
             className="group rounded-2xl border border-border bg-surface px-5 transition open:bg-surface-2"

@@ -1,5 +1,7 @@
-import { FiCheck } from "react-icons/fi";
+import Link from "next/link";
+import { FiArrowUpRight, FiCheck } from "react-icons/fi";
 import { PLATFORMS, tint } from "@/lib/platforms";
+import { pageForPlatform } from "@/lib/seo";
 import SectionHeading from "./SectionHeading";
 
 export default function Platforms() {
@@ -12,10 +14,12 @@ export default function Platforms() {
       />
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {PLATFORMS.map(({ id, name, icon: Icon, color, content, domains }) => (
-          <div
+          <Link
             key={id}
+            href={`/${pageForPlatform(id)?.slug ?? ""}`}
             className="group relative overflow-hidden rounded-3xl border border-border bg-surface p-4 transition hover:-translate-y-1 hover:shadow-xl sm:p-5"
           >
+            <FiArrowUpRight className="absolute right-4 top-4 text-muted opacity-0 transition group-hover:opacity-100" />
             <div
               className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
               style={{ background: color }}
@@ -36,7 +40,7 @@ export default function Platforms() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

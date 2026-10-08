@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import InstallApp from "../InstallApp";
 import Logo from "../Logo";
 
 const LINKS = [
-  { href: "#platforms", label: "Platforms" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#features", label: "Features" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#platforms", label: "Platforms" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#features", label: "Features" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export default function Navbar() {
@@ -29,20 +30,23 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        <a
-          href="#download"
-          className="bg-gradient-accent hidden rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md shadow-accent/25 transition hover:brightness-110 md:block"
-        >
-          Start downloading
-        </a>
-        <button
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-          aria-expanded={open}
-          className="rounded-lg p-2 text-muted hover:bg-surface-2 md:hidden"
-        >
-          {open ? <FiX size={20} /> : <FiMenu size={20} />}
-        </button>
+        <div className="flex items-center gap-2">
+          <InstallApp />
+          <a
+            href="#download"
+            className="bg-gradient-accent hidden rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md shadow-accent/25 transition hover:brightness-110 md:block"
+          >
+            Start downloading
+          </a>
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Menu"
+            aria-expanded={open}
+            className="rounded-lg p-2 text-muted hover:bg-surface-2 md:hidden"
+          >
+            {open ? <FiX size={20} /> : <FiMenu size={20} />}
+          </button>
+        </div>
       </nav>
       {open && (
         <ul className="animate-fade-up border-t border-border px-4 py-2 md:hidden">
