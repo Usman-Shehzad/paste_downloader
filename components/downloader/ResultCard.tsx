@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FiAlertTriangle, FiCheckCircle, FiClock, FiDownload, FiFilm, FiMusic, FiPlay, FiRefreshCw, FiUser } from "react-icons/fi";
 import { downloadUrl, formatBytes, formatDuration, type VideoFormat, type VideoInfo } from "@/lib/api";
 import { getPlatform } from "@/lib/platforms";
-import PreviewModal from "./PreviewModal";
+import PreviewModal, { canPreview } from "./PreviewModal";
 
 interface Props {
   info: VideoInfo;
@@ -25,6 +25,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
   const [started, setStarted] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const { icon: Icon, color, name } = getPlatform(info.platform);
+  const watchable = canPreview(info);
   const selected = info.formats.find((f) => f.format_id === formatId);
 
   function switchTab(next: Tab) {
@@ -47,7 +48,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
               className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             />
           )}
-          {info.embed_url && (
+          {watchable && (
             <button
               type="button"
               onClick={() => setPreviewing(true)}
@@ -60,7 +61,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
             </button>
           )}
           <span className="pointer-events-none absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
-            <Icon style={{ color }} /> {info.is_short ? "YouTube Shorts" : name}
+            <Icon style={{ color }} /> {info.is_short ? `${name} Shorts` : name}
           </span>
           {info.duration ? (
             <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-0.5 text-xs font-medium text-white">
@@ -144,7 +145,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
                   }`}
                 >
                   <span className="flex items-center gap-1.5 text-sm font-semibold">
-                    {f.kind === "audio" ? f.ext.toUpperCase() : `${f.height}p`}
+                    {f.quality}
                     {f.fps && f.fps > 30 ? (
                       <span className="text-[10px] font-semibold text-muted">{Math.round(f.fps)}fps</span>
                     ) : null}
@@ -179,7 +180,7 @@ export default function ResultCard({ info, url, onReset }: Props) {
               className="bg-gradient-accent flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98]"
             >
               <FiDownload className="shrink-0" />
-              Download {selected.kind === "audio" ? "audio" : `${selected.height}p`}
+              Download {selected.kind === "audio" ? "audio" : selected.quality}
               {selected.filesize ? <span className="font-medium opacity-80">· {sizeLabel(selected)}</span> : null}
             </a>
           ) : (
@@ -187,8 +188,8 @@ export default function ResultCard({ info, url, onReset }: Props) {
               {info.notice ? "Download unavailable" : "Choose a quality"}
             </button>
           )}
-          <div className={`grid gap-2 ${info.embed_url ? "grid-cols-2" : "grid-cols-1"}`}>
-            {info.embed_url && (
+          <div className={`grid gap-2 ${watchable ? "grid-cols-2" : "grid-cols-1"}`}>
+            {watchable && (
               <button
                 onClick={() => setPreviewing(true)}
                 className="flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-border font-medium text-muted transition hover:border-accent/50 hover:text-foreground"
@@ -207,8 +208,8 @@ export default function ResultCard({ info, url, onReset }: Props) {
         {started && (
           <p className="animate-fade-up flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
             <FiCheckCircle />
-            {selected?.needs_merge
-              ? "Preparing HD file. The download starts in a few seconds."
+            {selected?.needs_ffmpeg
+              ? "Preparing your file. The download starts in a few seconds."
               : "Download started. Check your browser's downloads."}
           </p>
         )}
@@ -218,10 +219,10 @@ export default function ResultCard({ info, url, onReset }: Props) {
   );
 }
 
-// Merged sizes are the sum of the video and audio streams, so they're estimates.
+// Merged and HLS sizes are estimated (stream sums or bitrate x duration).
 function sizeLabel(f: VideoFormat): string {
   const size = formatBytes(f.filesize);
-  return size && f.needs_merge ? `~${size}` : size;
+  return size && f.needs_ffmpeg ? `~${size}` : size;
 }
 
 export function ResultSkeleton() {

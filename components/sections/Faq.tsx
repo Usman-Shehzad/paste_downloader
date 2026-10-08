@@ -7,8 +7,8 @@ const FAQS = [
     a: "Yes. There's no sign-up, no payment and no limit on how many videos you can download.",
   },
   {
-    q: "Can I download YouTube Shorts?",
-    a: "Yes. Paste a Shorts link (youtube.com/shorts/...) into the YouTube tab. You can watch it in the vertical player and download it as a video or audio only.",
+    q: "Which platforms are supported?",
+    a: "TikTok, Instagram, Facebook, X (Twitter), Pinterest, Snapchat, Reddit, LinkedIn, Twitch, Dailymotion, SoundCloud, Bluesky, Tumblr, Rumble, Streamable, 9GAG and Imgur. Pick the platform's tab (or open “More”), then paste the link.",
   },
   {
     q: "Where do I find the video link?",
@@ -16,7 +16,7 @@ const FAQS = [
   },
   {
     q: "Which qualities can I download?",
-    a: "Every resolution the platform offers, from 144p up to 1080p, 2K and 4K. HD files are joined from separate picture and sound streams as they download, so sizes for those are estimates.",
+    a: "Every resolution the platform offers, up to 1080p, 2K and 4K where available, plus audio only. Some files are assembled as they download, so their sizes (marked ~) are estimates.",
   },
   {
     q: "Can I download private videos?",

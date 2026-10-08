@@ -35,8 +35,8 @@ export default function Home() {
               <span className="text-gradient">Capture the video.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">
-              Download videos, Shorts, Reels and audio from YouTube, TikTok, Instagram and Facebook in the
-              quality you want, in seconds.
+              Download videos, Reels and audio from TikTok, Instagram, Facebook, X and {PLATFORMS.length - 4} more
+              platforms in the quality you want, in seconds.
             </p>
           </div>
 
@@ -51,11 +51,11 @@ export default function Home() {
             <span className="flex items-center gap-1.5">
               <FiShield className="text-accent" /> No files stored
             </span>
-            <span className="flex items-center gap-2">
-              {PLATFORMS.map(({ id, icon: Icon, color }) => (
-                <Icon key={id} style={{ color }} size={18} />
-              ))}
-            </span>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {PLATFORMS.map(({ id, name, icon: Icon, color }) => (
+              <Icon key={id} title={name} style={{ color }} size={18} className="opacity-80 transition hover:scale-125 hover:opacity-100" />
+            ))}
           </div>
         </section>
 

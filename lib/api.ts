@@ -3,12 +3,16 @@ import type { PlatformId } from "./platforms";
 export interface VideoFormat {
   format_id: string;
   label: string;
+  /** Short quality name: "1080p", "Best"/"High" when no resolution is known, or the audio type. */
+  quality: string;
   kind: "video" | "audio";
   height: number | null;
   fps: number | null;
   ext: string;
   filesize: number | null;
   needs_merge: boolean;
+  /** Remuxed by ffmpeg while downloading (merged or HLS), so the size is an estimate. */
+  needs_ffmpeg: boolean;
   available: boolean;
 }
 
@@ -22,7 +26,7 @@ export interface VideoInfo {
   height: number | null;
   embed_url: string | null;
   is_short: boolean;
-  // Set when the video can be previewed but not downloaded (e.g. YouTube blocking the server).
+  // Set when the video can be previewed but not downloaded (e.g. a platform blocking the server).
   notice: string | null;
   formats: VideoFormat[];
 }
@@ -43,9 +47,21 @@ export async function fetchInfo(
   return data as VideoInfo;
 }
 
-export function downloadUrl(url: string, formatId: string): string {
+/** `inline` streams the file for playing in the page instead of saving it. */
+export function downloadUrl(url: string, formatId: string, inline = false): string {
   const params = new URLSearchParams({ url, format_id: formatId });
+  if (inline) params.set("inline", "1");
   return `/api/py/download?${params}`;
+}
+
+/**
+ * The format to play for "Watch" when there's no official embed: the smallest
+ * video (cheapest to stream), else the audio. Formats arrive best-first.
+ */
+export function previewFormat(info: VideoInfo): VideoFormat | null {
+  const usable = info.formats.filter((f) => f.available);
+  const videos = usable.filter((f) => f.kind === "video");
+  return videos[videos.length - 1] ?? usable.find((f) => f.kind === "audio") ?? null;
 }
 
 export function formatBytes(bytes: number | null): string {

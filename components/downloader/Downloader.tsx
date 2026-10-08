@@ -11,7 +11,7 @@ import UrlInput from "./UrlInput";
 
 export default function Downloader() {
   const [url, setUrl] = useState("");
-  const [platform, setPlatform] = useState<PlatformId>("youtube");
+  const [platform, setPlatform] = useState<PlatformId>("tiktok");
   const [info, setInfo] = useState<VideoInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,9 +82,7 @@ export default function Downloader() {
           onSubmit={submit}
           loading={loading}
           invalid={invalid || wrongTab}
-          placeholder={
-            platform === "youtube" ? "Paste YouTube video or Shorts link here…" : `Paste ${current.name} link here…`
-          }
+          placeholder={`Paste ${current.name} link here…`}
         />
 
         <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-muted">

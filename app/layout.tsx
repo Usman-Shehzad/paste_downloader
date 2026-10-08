@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Paste Cap: YouTube, TikTok, Instagram & Facebook Video Downloader",
+  title: "Paste Cap: TikTok, Instagram, Facebook, X & More Video Downloader",
   description:
-    "Paste a YouTube, TikTok, Instagram or Facebook link and download the video or audio in the quality you want. Free, no sign-up.",
+    "Paste a link from TikTok, Instagram, Facebook, X, Pinterest, Reddit and 11 more platforms and download the video or audio in the quality you want. Free, no sign-up.",
   icons: { icon: "/icon.png", apple: "/icon.png" },
 };
 

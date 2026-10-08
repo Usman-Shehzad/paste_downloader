@@ -1,5 +1,5 @@
 import { FiCheck } from "react-icons/fi";
-import { PLATFORMS } from "@/lib/platforms";
+import { PLATFORMS, tint } from "@/lib/platforms";
 import SectionHeading from "./SectionHeading";
 
 export default function Platforms() {
@@ -7,14 +7,14 @@ export default function Platforms() {
     <section id="platforms" className="scroll-mt-20 py-24">
       <SectionHeading
         eyebrow="Platforms"
-        title="One box for every platform"
-        subtitle="Paste a link from any of these and Paste Cap detects the platform automatically."
+        title={`${PLATFORMS.length} platforms, one box`}
+        subtitle="Pick the platform, paste the link, and choose your quality."
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {PLATFORMS.map(({ id, name, icon: Icon, color, content, domains }) => (
           <div
             key={id}
-            className="group relative overflow-hidden rounded-3xl border border-border bg-surface p-6 transition hover:-translate-y-1 hover:shadow-xl"
+            className="group relative overflow-hidden rounded-3xl border border-border bg-surface p-4 transition hover:-translate-y-1 hover:shadow-xl sm:p-5"
           >
             <div
               className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
@@ -23,16 +23,16 @@ export default function Platforms() {
             />
             <div
               className="grid h-12 w-12 place-items-center rounded-2xl"
-              style={{ background: `${color}1f`, color }}
+              style={{ background: tint(color, 12), color }}
             >
               <Icon size={26} />
             </div>
-            <h3 className="mt-5 text-lg font-semibold">{name} Downloader</h3>
-            <p className="mt-1 text-xs text-muted">{domains.join(" · ")}</p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <h3 className="mt-4 font-semibold sm:text-lg">{name} Downloader</h3>
+            <p className="mt-1 truncate text-xs text-muted">{domains.slice(0, 2).join(" · ")}</p>
+            <ul className="mt-3 space-y-1.5 text-sm">
               {content.map((c) => (
-                <li key={c} className="flex items-center gap-2 text-muted">
-                  <FiCheck className="text-emerald-500" /> {c}
+                <li key={c} className="flex items-start gap-2 text-muted">
+                  <FiCheck className="mt-0.5 shrink-0 text-emerald-500" /> {c}
                 </li>
               ))}
             </ul>

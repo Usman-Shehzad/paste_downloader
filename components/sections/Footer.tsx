@@ -4,20 +4,20 @@ import Logo from "../Logo";
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-surface/50">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <Logo />
           <p className="mt-4 max-w-sm text-sm text-muted">
             Paste a link, pick a quality, download. Fast and free video downloads from your favourite platforms.
           </p>
         </div>
-        <div>
+        <div className="lg:col-span-2">
           <h4 className="text-sm font-semibold">Downloaders</h4>
-          <ul className="mt-4 space-y-2.5 text-sm text-muted">
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm text-muted">
             {PLATFORMS.map(({ id, name, icon: Icon }) => (
               <li key={id}>
                 <a href="#download" className="flex items-center gap-2 transition hover:text-foreground">
-                  <Icon /> {name} Downloader
+                  <Icon className="shrink-0" /> {name}
                 </a>
               </li>
             ))}
