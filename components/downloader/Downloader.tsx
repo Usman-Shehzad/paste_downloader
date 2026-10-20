@@ -78,7 +78,7 @@ export default function Downloader({ initialPlatform = "tiktok" }: { initialPlat
   return (
     <div id="download" className="relative scroll-mt-24">
       <div className="bg-gradient-accent absolute -inset-px rounded-[28px] opacity-30 blur-xl" aria-hidden />
-      <div className="relative flex flex-col gap-4 rounded-[28px] border border-border bg-surface/90 p-3 shadow-2xl backdrop-blur-xl sm:p-5">
+      <div className="border-light relative flex flex-col gap-4 rounded-[28px] border border-border bg-surface/90 p-3 shadow-2xl backdrop-blur-xl sm:p-5">
         <PlatformTabs
           selected={platform}
           onSelect={(id) => {

@@ -1,6 +1,7 @@
 import { FiChevronDown } from "react-icons/fi";
 import type { Faq as FaqItem } from "@/lib/seo";
 import SectionHeading from "./SectionHeading";
+import Reveal from "@/components/motion/Reveal";
 
 export const HOME_FAQS: FaqItem[] = [
   {
@@ -44,9 +45,9 @@ export default function Faq({
     <section id="faq" className="scroll-mt-20 py-24">
       <SectionHeading eyebrow="FAQ" title={title} />
       <div className="mx-auto max-w-3xl space-y-3">
-        {items.map(({ q, a }) => (
+        {items.map(({ q, a }, i) => (
+          <Reveal key={q} delay={i * 60}>
           <details
-            key={q}
             className="group rounded-2xl border border-border bg-surface px-5 transition open:bg-surface-2"
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium [&::-webkit-details-marker]:hidden">
@@ -55,6 +56,7 @@ export default function Faq({
             </summary>
             <p className="pb-5 text-sm leading-relaxed text-muted">{a}</p>
           </details>
+          </Reveal>
         ))}
       </div>
     </section>

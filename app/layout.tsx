@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import PointerSpotlight from "@/components/motion/PointerSpotlight";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -29,8 +30,16 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-dvh font-sans antialiased">{children}</body>
+    // suppressHydrationWarning: the inline script adds the "js" class before React loads.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Marks that JS runs, so scroll-reveal content is only hidden when it can be revealed. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body className="min-h-dvh font-sans antialiased">
+        <PointerSpotlight />
+        {children}
+      </body>
     </html>
   );
 }

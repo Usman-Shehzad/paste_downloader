@@ -48,14 +48,16 @@ export default function Hero({ title, subtitle, initialPlatform }: Props) {
           </span>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-          {PLATFORMS.map(({ id, name, icon: Icon, color }) => (
-            <Icon
-              key={id}
-              title={name}
-              style={{ color }}
-              size={18}
-              className="opacity-80 transition hover:scale-125 hover:opacity-100"
-            />
+          {PLATFORMS.map(({ id, name, icon: Icon, color }, i) => (
+            // Each icon bobs a little later than the one before: a wave along the row.
+            <span key={id} className="animate-wave" style={{ animationDelay: `${i * 120}ms` }}>
+              <Icon
+                title={name}
+                style={{ color }}
+                size={18}
+                className="opacity-80 transition hover:scale-125 hover:opacity-100"
+              />
+            </span>
           ))}
         </div>
       </section>

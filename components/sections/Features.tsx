@@ -1,5 +1,6 @@
 import { FiGift, FiLock, FiMusic, FiSmartphone, FiZap, FiMonitor } from "react-icons/fi";
 import SectionHeading from "./SectionHeading";
+import Reveal from "@/components/motion/Reveal";
 
 const FEATURES = [
   { icon: FiZap, title: "Fast streaming", text: "Files stream straight to you without waiting for a server-side copy." },
@@ -17,10 +18,11 @@ export default function Features() {
         eyebrow="Features"
         title="Everything you need, nothing you don't"
       />
+      <Reveal>
       <div className="grid gap-px overflow-hidden rounded-3xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="bg-surface p-7 transition hover:bg-surface-2">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-accent/10 text-accent">
+          <div key={title} className="spotlight group relative bg-surface p-7 transition hover:bg-surface-2">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-accent/10 text-accent transition duration-300 group-hover:-translate-y-0.5 group-hover:scale-110">
               <Icon size={20} />
             </div>
             <h3 className="mt-4 font-semibold">{title}</h3>
@@ -28,6 +30,7 @@ export default function Features() {
           </div>
         ))}
       </div>
+      </Reveal>
     </section>
   );
 }

@@ -62,7 +62,7 @@ export default async function PlatformLanding({ params }: Params) {
           initialPlatform={platform.id}
           title={
             <>
-              <span className="text-gradient">{page.keyword}</span>
+              <span className="text-gradient-animated">{page.keyword}</span>
             </>
           }
           subtitle={`Download ${page.noun} in HD, or save the sound as MP3. Free, no sign-up, works on phone and desktop.`}

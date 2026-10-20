@@ -32,7 +32,7 @@ export default function Home() {
             <>
               Paste the link.
               <br />
-              <span className="text-gradient">Capture the video.</span>
+              <span className="text-gradient-animated">Capture the video.</span>
             </>
           }
           subtitle={

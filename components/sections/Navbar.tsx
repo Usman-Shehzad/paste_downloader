@@ -34,7 +34,7 @@ export default function Navbar() {
           <InstallApp />
           <a
             href="#download"
-            className="bg-gradient-accent hidden rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md shadow-accent/25 transition hover:brightness-110 md:block"
+            className="bg-gradient-accent shine relative hidden rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md shadow-accent/25 transition hover:brightness-110 md:block"
           >
             Start downloading
           </a>

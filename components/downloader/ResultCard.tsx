@@ -175,7 +175,7 @@ function ItemCard({ info, url, onReset, picker }: Props & { picker: React.ReactN
 
         {list.length ? (
           <div role="radiogroup" aria-label="Quality" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {list.map((f) => {
+            {list.map((f, i) => {
               const active = f.format_id === formatId;
               const hd = (f.height ?? 0) >= 720;
               return (
@@ -190,7 +190,8 @@ function ItemCard({ info, url, onReset, picker }: Props & { picker: React.ReactN
                     setStarted(false);
                   }}
                   title={f.available ? undefined : "This quality isn't available right now"}
-                  className={`relative rounded-xl border px-3 py-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                  style={{ animationDelay: `${i * 45}ms` }}
+                  className={`animate-pop-in relative rounded-xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 ${
                     active
                       ? "border-accent bg-accent/10 ring-2 ring-accent/20"
                       : "border-border bg-surface hover:border-accent/50"
@@ -229,7 +230,7 @@ function ItemCard({ info, url, onReset, picker }: Props & { picker: React.ReactN
               href={downloadUrl(url, selected.format_id, { item: info.item })}
               download
               onClick={() => setStarted(true)}
-              className="bg-gradient-accent flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98]"
+              className="bg-gradient-accent shine relative flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98]"
             >
               <FiDownload className="shrink-0" />
               Download {selected.quality}
