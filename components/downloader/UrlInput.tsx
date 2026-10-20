@@ -69,7 +69,7 @@ export default function UrlInput({ value, onChange, onSubmit, loading, placehold
       <button
         type="submit"
         disabled={!value || loading}
-        className="bg-gradient-accent shine relative flex h-14 items-center justify-center gap-2 rounded-2xl px-7 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
+        className="bg-gradient-accent shine magnetic relative flex h-14 items-center justify-center gap-2 rounded-2xl px-7 font-semibold text-white shadow-lg shadow-accent/25 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
       >
         {loading ? (
           <>

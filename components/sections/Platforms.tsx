@@ -19,7 +19,7 @@ export default function Platforms() {
           <Reveal key={id} delay={(i % 4) * 80} className="h-full">
           <Link
             href={`/${pageForPlatform(id)?.slug ?? ""}`}
-            className="spotlight group relative block h-full overflow-hidden rounded-3xl border border-border bg-surface p-4 transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-5"
+            className="spotlight tilt group relative block h-full overflow-hidden rounded-3xl border border-border bg-surface p-4 transition duration-300 hover:shadow-xl sm:p-5"
           >
             <FiArrowUpRight className="absolute right-4 top-4 text-muted opacity-0 transition group-hover:opacity-100" />
             <div

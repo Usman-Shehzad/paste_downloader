@@ -1,7 +1,8 @@
-import { FiChevronDown } from "react-icons/fi";
-import type { Faq as FaqItem } from "@/lib/seo";
-import SectionHeading from "./SectionHeading";
+import { FiArrowRight, FiMail, FiMessageCircle } from "react-icons/fi";
 import Reveal from "@/components/motion/Reveal";
+import type { Faq as FaqItem } from "@/lib/seo";
+import { SITE } from "@/lib/site";
+import FaqAccordion from "./FaqAccordion";
 
 export const HOME_FAQS: FaqItem[] = [
   {
@@ -43,21 +44,35 @@ export default function Faq({
 }) {
   return (
     <section id="faq" className="scroll-mt-20 py-24">
-      <SectionHeading eyebrow="FAQ" title={title} />
-      <div className="mx-auto max-w-3xl space-y-3">
-        {items.map(({ q, a }, i) => (
-          <Reveal key={q} delay={i * 60}>
-          <details
-            className="group rounded-2xl border border-border bg-surface px-5 transition open:bg-surface-2"
-          >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium [&::-webkit-details-marker]:hidden">
-              {q}
-              <FiChevronDown className="shrink-0 text-muted transition group-open:rotate-180" />
-            </summary>
-            <p className="pb-5 text-sm leading-relaxed text-muted">{a}</p>
-          </details>
-          </Reveal>
-        ))}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+        {/* Heading and contact card stay in view while the questions scroll. */}
+        <Reveal className="lg:sticky lg:top-28 lg:self-start">
+          <p className="text-gradient text-sm font-semibold uppercase tracking-widest">FAQ</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
+          <p className="mt-4 max-w-md text-muted">
+            Quick answers about downloading, quality, MP3 and privacy. Tap a question to open it.
+          </p>
+
+          <div className="spotlight relative mt-8 overflow-hidden rounded-3xl border border-border bg-surface p-6">
+            <div className="bg-gradient-accent pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-20 blur-3xl" aria-hidden />
+            <span className="bg-gradient-accent grid h-11 w-11 place-items-center rounded-xl text-white shadow-lg shadow-accent/25">
+              <FiMessageCircle size={20} />
+            </span>
+            <h3 className="mt-4 font-semibold">Still have questions?</h3>
+            <p className="mt-1 text-sm text-muted">
+              Can&apos;t find what you&apos;re looking for? Send us a message and we&apos;ll get back to you.
+            </p>
+            <a
+              href={`mailto:${SITE.email}`}
+              className="group/mail mt-5 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm font-semibold transition hover:border-accent/50"
+            >
+              <FiMail /> Contact us
+              <FiArrowRight className="transition-transform group-hover/mail:translate-x-1" />
+            </a>
+          </div>
+        </Reveal>
+
+        <FaqAccordion items={items} />
       </div>
     </section>
   );

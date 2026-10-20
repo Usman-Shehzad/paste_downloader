@@ -14,6 +14,17 @@ export default function Hero({ title, subtitle, initialPlatform }: Props) {
   return (
     <>
       <div className="bg-grid pointer-events-none absolute inset-x-0 top-0 h-[720px]" aria-hidden />
+      {/* Two soft colour glows drifting slowly behind the hero. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[720px] overflow-hidden" aria-hidden>
+        <div
+          className="animate-aurora-a absolute left-[8%] top-[6%] h-[380px] w-[380px] rounded-full opacity-25 blur-[90px]"
+          style={{ background: "var(--accent)" }}
+        />
+        <div
+          className="animate-aurora-b absolute right-[6%] top-[22%] h-[340px] w-[340px] rounded-full opacity-20 blur-[90px]"
+          style={{ background: "var(--accent-2)" }}
+        />
+      </div>
       <div
         className="pointer-events-none absolute left-1/2 top-[-200px] h-[600px] w-[900px] -translate-x-1/2 rounded-full blur-3xl"
         style={{ background: "radial-gradient(closest-side, var(--glow), transparent)" }}
@@ -29,7 +40,7 @@ export default function Hero({ title, subtitle, initialPlatform }: Props) {
             </span>
             Free · No sign-up · HD quality
           </span>
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
+          <h1 className="animate-blur-in mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">{subtitle}</p>
         </div>
 

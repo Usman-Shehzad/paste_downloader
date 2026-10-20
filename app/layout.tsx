@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import PointerSpotlight from "@/components/motion/PointerSpotlight";
+import Cursor from "@/components/motion/Cursor";
+import PointerEffects from "@/components/motion/PointerEffects";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -37,7 +38,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body className="min-h-dvh font-sans antialiased">
-        <PointerSpotlight />
+        {/* Thin bar at the top showing how far the page is scrolled. */}
+        <div className="scroll-progress" aria-hidden />
+        <PointerEffects />
+        <Cursor />
         {children}
       </body>
     </html>

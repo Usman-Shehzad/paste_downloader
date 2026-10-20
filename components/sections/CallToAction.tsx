@@ -9,7 +9,7 @@ export default function CallToAction({ text = "Copy a link from any supported pl
         <p className="relative mx-auto mt-3 max-w-md text-white/85">{text}</p>
         <a
           href="#download"
-          className="shine relative mt-7 inline-block rounded-xl bg-white px-6 py-3 font-semibold text-black shadow-lg transition hover:scale-105"
+          className="shine magnetic relative mt-7 inline-block rounded-xl bg-white px-6 py-3 font-semibold text-black shadow-lg transition hover:scale-105"
         >
           Paste a link now
         </a>
